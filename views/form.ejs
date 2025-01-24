@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Conductor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col items-center py-8">
+  <h1 class="text-3xl font-bold text-gray-800 mb-6">Registrar Conductor</h1>
+
+  <form action="/register" method="POST" class="bg-white shadow-md rounded px-8 py-6 w-full max-w-lg">
+    <div class="mb-4">
+      <label for="name" class="block text-gray-700 font-semibold mb-2">Nombre:</label>
+      <input type="text" id="name" name="name" required
+        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+    </div>
+
+    <div class="mb-4">
+      <label for="license" class="block text-gray-700 font-semibold mb-2">Licencia:</label>
+      <input type="text" id="license" name="license" required
+        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+    </div>
+
+    <div class="mb-4">
+      <label for="account_number" class="block text-gray-700 font-semibold mb-2">Número de Cuenta:</label>
+      <input type="text" id="account_number" name="account_number" required
+        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+    </div>
+
+    <div class="mb-4">
+      <label for="bank" class="block text-gray-700 font-semibold mb-2">Banco:</label>
+      <input type="text" id="bank" name="bank" required
+        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+    </div>
+
+    <button type="submit"
+      class="w-full bg-blue-500 text-white font-semibold py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+      Registrar
+    </button>
+  </form>
+</body>
+
+</html>
