@@ -1,3 +1,4 @@
+<!-- views/refer.ejs -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,247 +6,283 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrar Referido</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body class="bg-gray-100 p-10 text-gray-800">
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-    <h1 class="text-xl font-semibold mb-4">Registrar Referido</h1>
-    <form id="referralForm" class="space-y-6">
-      <!-- Referido y Referidor en la misma fila -->
-      <div class="flex items-center gap-4">
-        <!-- Referidor -->
-        <div class="flex-1">
-          <label for="referer" class="block text-sm font-medium">Referidor:</label>
-          <select id="referer" name="refererId" required
-            class="w-full px-3 py-2 border rounded text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">Selecciona un conductor</option>
-            <% drivers.forEach(driver=> { %>
-              <option value="<%= driver.id %>">
-                <%= driver.name %>
-              </option>
-              <% }) %>
-          </select>
+<body>
+  <!-- <butto%- include('partials/header') %> -->
+  <%- include('partials/header') %>
+
+    <main class="bg-light py-5 text-dark">
+      <div class="container">
+        <!-- Registrar Referido -->
+        <div class="card shadow mb-5">
+          <div class="card-body">
+            <h1 class="card-title fs-4 mb-4">Registrar Referido</h1>
+            <form id="referralForm">
+              <div class="row g-3">
+                <!-- Referidor -->
+                <div class="col-md-5">
+                  <label for="referer" class="form-label">Referidor:</label>
+                  <select id="referer" name="refererId" class="form-select" required>
+                    <option value="">Selecciona un conductor</option>
+                    <% drivers.forEach(driver=> { %>
+                      <option value="<%= driver.id %>">
+                        <%= driver.name %>
+                      </option>
+                      <% }) %>
+                  </select>
+                </div>
+
+                <!-- Icono de flecha -->
+                <div class="col-md-2 text-center d-flex align-items-center justify-content-center">
+                  <span class="fs-4 text-secondary">&rarr;</span>
+                </div>
+
+                <!-- Referido -->
+                <div class="col-md-5">
+                  <label for="referred" class="form-label">Referido:</label>
+                  <select id="referred" name="referredId" class="form-select" required>
+                    <option value="">Selecciona un conductor</option>
+                    <% drivers.forEach(driver=> { %>
+                      <option value="<%= driver.id %>">
+                        <%= driver.name %>
+                      </option>
+                      <% }) %>
+                  </select>
+                </div>
+              </div>
+
+              <div class="d-grid gap-2 col-4 mx-auto mt-3">
+
+                <button type="submit" class="btn btn-primary w-100">Registrar</button>
+              </div>
+            </form>
+            <div id="message" class="mt-3 text-center"></div>
+          </div>
         </div>
 
-        <!-- Icono de flecha -->
-        <div class="text-center">
-          <span class="text-gray-500">&rarr;</span>
-        </div>
+        <!-- Consultar Referidos -->
+        <div class="card shadow">
+          <div class="card-body">
+            <h2 class="card-title fs-5 mb-4">Consultar Referidos</h2>
 
-        <!-- Referido -->
-        <div class="flex-1">
-          <label for="referred" class="block text-sm font-medium">Referido:</label>
-          <select id="referred" name="referredId" required
-            class="w-full px-3 py-2 border rounded text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">Selecciona un conductor</option>
-            <% drivers.forEach(driver=> { %>
-              <option value="<%= driver.id %>">
-                <%= driver.name %>
-              </option>
-              <% }) %>
-          </select>
+            <div class="mb-4">
+              <div class="row">
+                <div class="col-3">
+                  <label for="driverDropdown" class="form-label">Conductor:</label>
+                  <select id="driverDropdown" class="form-select mb-3">
+                    <option value="" disabled selected>Seleccionar Conductor</option>
+                    <% drivers.forEach(driver=> { %>
+                      <option value="<%= driver.id %>">
+                        <%= driver.name %>
+                      </option>
+                      <% }) %>
+                  </select>
+                </div>
+                <div class="col-3">
+                  <label for="paid" class="form-label">Pagado:</label>
+                  <select id="paid" class="form-select mb-3">
+                    <option value="" disabled selected>Seleccionar</option>
+                    <option value="true">
+                      Si
+                    </option>
+                    <option value="false">
+                      No
+                    </option>
+                  </select>
+                </div>
+                <div class="col-3">
+                  <label for="start" class="form-label">Inicio:</label>
+                  <input type="date" id="start" class="form-control mb-3" name="trip-start" min="2025-01-01"
+                    max="2025-12-31">
+
+                </div>
+                <div class="col-3">
+                  <label for="end" class="form-label">Fin:</label>
+                  <input type="date" id="end" class="form-control mb-3" name="trip-end" min="2025-01-01"
+                    max="2025-12-31">
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button id="download-button" class="btn btn-link">Descargar Excel</button>
+              </div>
+
+              <div class="d-grid gap-2 col-4 mx-auto mt-3">
+                <button class="btn btn-primary w-100" onclick="fetchLevelReferrals()">Buscar</button>
+              </div>
+
+            </div>
+
+            <table class="table table-bordered table-striped text-center">
+              <thead class="table-light">
+                <tr>
+                  <th>ID</th>
+                  <th>Referidor</th>
+                  <th>Referido</th>
+                  <th>Nivel</th>
+                  <th>Monto</th>
+                  <th>Fecha ref</th>
+                  <th>Pagado</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="referralTableBody">
+                <!-- Aquí se insertan las filas dinámicamente -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Botón de registro -->
-      <button type="submit"
-        class="w-full py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm">
-        Registrar
-      </button>
-    </form>
-    <div id="message" class="text-sm text-red-500 mt-2"></div>
-  </div>
 
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow mt-8">
-    <h2 class="text-lg font-semibold mb-4">Consultar Referidos</h2>
+    </main>
+</body>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const referralForm = document.getElementById('referralForm');
 
-    <div class="mb-4">
-      <label for="startDate" class="block text-sm font-medium">Fecha de inicio:</label>
-      <input type="date" id="startDate" class="w-full px-3 py-2 border rounded text-sm bg-gray-50">
-    </div>
-    <div class="mb-4">
-      <label for="endDate" class="block text-sm font-medium">Fecha de fin:</label>
-      <input type="date" id="endDate" class="w-full px-3 py-2 border rounded text-sm bg-gray-50">
-    </div>
+  referralForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    <!-- <div class="mb-4">
-      <label for="driverDropdown" class="block text-sm font-medium">Seleccionar Conductor:</label>
-      <select id="driverDropdown"
-        class="w-full px-3 py-2 border rounded text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <option value="" disabled selected>Seleccionar Conductor</option>
-        <% drivers.forEach(driver=> { %>
-          <option value="<%= driver.id %>">
-            <%= driver.name %>
-          </option>
-          <% }); %>
-      </select> -->
-  </div>
-  <!-- <div class="mb-4">
-      <label for="filterName" class="block text-sm font-medium">Nombre del referido:</label>
-      <input type="text" id="filterName" placeholder="Nombre"
-        class="w-full px-3 py-2 border rounded text-sm bg-gray-50">
-    </div> -->
-  <button onclick="fetchLevelReferrals()"
-    class="w-full py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600 transition text-sm">
-    Buscar
-  </button>
+    const referer_id = document.getElementById('referer').value;
+    const referred_id = document.getElementById('referred').value;
 
-  <table class="table-auto w-full border-collapse border text-sm">
-    <thead class="bg-gray-200">
-      <tr>
-        <th class="border px-2 py-1 text-left">ID</th>
-        <th class="border px-2 py-1 text-left">Licencia</th>
-        <th class="border px-2 py-1 text-left">Referido</th>
-        <th class="border px-2 py-1 text-left">Nivel</th>
-        <th class="border px-2 py-1 text-left">Monto</th>
-        <th class="border px-2 py-1 text-left">Pagado</th>
-        <th class="border px-2 py-1 text-left">Acción</th>
-      </tr>
-    </thead>
-    <tbody id="referralTableBody" class="bg-white">
-      <!-- Aquí se insertan las filas dinámicamente -->
-    </tbody>
-  </table>
-  </div>
+    if (!referer_id || !referred_id) {
+      document.getElementById('message').classList.add('text-danger');
+      document.getElementById('message').textContent = 'Selecciona ambos conductores.';
 
-  <script>
-    const referralForm = document.getElementById('referralForm');
-
-    referralForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const refererId = document.getElementById('referer').value;
-      const referredId = document.getElementById('referred').value;
-
-      if (!refererId || !referredId) {
-        document.getElementById('message').textContent = 'Selecciona ambos conductores.';
-        return;
-      }
-
-      try {
-        const response = await fetch('/refer', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ refererId, referredId })
-        });
-
-        const result = await response.json();
-        document.getElementById('message').textContent = result.message;
-      } catch (error) {
-        document.getElementById('message').textContent = 'Error al registrar el referido.';
-      }
-    });
-
-    // async function fetchLevelReferrals() {
-    // const driverId = document.getElementById('driverDropdown').value;
-
-    // const tableBody = document.getElementById('referralTableBody');
-    // tableBody.innerHTML = ''; // Limpiar tabla antes de cargar nuevos datos
-
-    // if (driverId) {
-    //   const response = await fetch(`/refer-level/${driverId}`);
-    //   const referrals = await response.json();
-    //   console.log(referrals)
-
-    //   if (referrals && referrals.length > 0) {
-    //     referrals.forEach(referral => {
-    //       const row = document.createElement('tr');
-    //       row.innerHTML = `
-    //                   <td>${referral.referred_id}</td>
-    //                   <td>${referral.drivers.license}</td>
-    //                   <td>${referral.drivers.name}</td>
-    //                   <td>${referral.level}</td>
-    //                   <td>${referral.amount}</td>
-    //                   <td>${referral.paid === true ? "Si" : "No"}</td>
-    //                   <td class="px-4 py-2 border border-gray-300">
-    //                     <button 
-    //                       id="paid-btn-${referral.id}" 
-    //                       onclick="markAsPaid(${referral.id})"
-    //                       class="bg-blue-500 text-white px-4 py-2 rounded-md"
-    //                       ${referral.paid ? 'disabled' : ''}
-    //                     >
-    //                        ${referral.paid ? 'Pagado' : 'Pagar'}
-    //                     </button>
-    //                   </td>`;
-    //       tableBody.appendChild(row);
-    //     });
-    //   } else {
-    //     const row = document.createElement('tr');
-    //     row.innerHTML = `<td colspan="7" class="text-center">No hay referidos para este conductor.</td>`;
-    //     tableBody.appendChild(row);
-    //   }
-    // }
-    // }
-
-
-    async function fetchLevelReferrals() {
-      // const driverId = document.getElementById('driverDropdown').value;
-      // console.log("🚀 ~ fetchLevelReferrals ~ driverId:", driverId)
-      const startDate = document.getElementById('startDate').value;
-      console.log("🚀 ~ fetchLevelReferrals ~ startDate:", startDate)
-      const endDate = document.getElementById('endDate').value;
-      console.log("🚀 ~ fetchLevelReferrals ~ endDate:", endDate)
-      // const name = document.getElementById('filterName').value;
-      // console.log("🚀 ~ fetchLevelReferrals ~ name:", name)
-
-      if (!driverId) {
-        alert('Selecciona un conductor');
-        return;
-      }
-
-      try {
-        const response = await fetch(`/refer-level/${driverId}?startDate=${startDate}&endDate=${endDate}&name=${name}`);
-        const data = await response.json();
-
-        const tableBody = document.getElementById('referralTableBody');
-        tableBody.innerHTML = '';
-
-        data.forEach(referral => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-                <td class="border px-2 py-1">${referral.id}</td>
-                <td class="border px-2 py-1">${referral.drivers.license}</td>
-                <td class="border px-2 py-1">${referral.drivers.name}</td>
-                <td class="border px-2 py-1">${referral.level}</td>
-                <td class="border px-2 py-1">${referral.amount}</td>
-                <td class="border px-2 py-1">${referral.paid ? 'Sí' : 'No'}</td>
-            `;
-          tableBody.appendChild(row);
-        });
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Ocurrió un error al buscar los referidos.');
-      }
+      setTimeout(() => {
+        document.getElementById('message').textContent = '';
+      }, 3000);
+      return;
     }
 
-    // async function markAsPaid(referralId) {
-    //   try {
-    //     const response = await fetch(`/update-paid-status`, {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/json'
-    //       },
-    //       body: JSON.stringify({ referralId, paid: true }) // Mandamos el estado de pagado
-    //     });
+    try {
+      const response = await fetch('/referrals/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ referer_id, referred_id })
+      });
 
-    //     const result = await response.json();
-    //     if (result.success) {
-    //       // Cambiar el estado visualmente
-    //       document.getElementById(`paid-btn-${referralId}`).textContent = 'Pagado';
-    //       document.getElementById(`paid-btn-${referralId}`).disabled = true;
-    //     } else {
-    //       alert('Error al marcar como pagado.');
-    //     }
-    //   } catch (error) {
-    //     console.error('Error:', error);
-    //     alert('Error al marcar como pagado.');
-    //   }
-    // }
-  </script>
-</body>
+      const result = await response.json();
+
+      if (result.status === 'success') {
+        document.getElementById('message').classList.add('text-success');
+        document.getElementById('message').textContent = result.message;
+      } else {
+        document.getElementById('message').classList.add('text-danger');
+        document.getElementById('message').textContent = result.message;
+      }
+
+      setTimeout(() => {
+        document.getElementById('message').textContent = '';
+      }, 3000);
+    } catch (error) {
+      console.log("🚀 ~ referralForm.addEventListener ~ error:", error)
+    }
+  });
+
+  async function fetchLevelReferrals() {
+    const driverId = document.getElementById('driverDropdown').value;
+    const startDate = document.getElementById('start').value;
+    const endDate = document.getElementById('end').value;
+    const paid = document.getElementById('paid').value;
+
+    const tableBody = document.getElementById('referralTableBody');
+    tableBody.innerHTML = '';
+
+
+    const response = await fetch(`/referrals/report?refererId=${driverId}&startDate=${startDate}&endDate=${endDate}&paid=${paid}`);
+    const referrals = await response.json();
+
+    console.log(referrals)
+
+    if (referrals && referrals.length > 0) {
+      referrals.forEach(referral => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${referral.referred_id}</td>
+          <td>${referral.referer.name}</td>
+          <td>${referral.referred.name}</td>
+          <td>${referral.level}</td>
+          <td>${referral.amount}</td>
+          <td>${referral.created_at}</td>
+          <td>${referral.paid ? "Sí" : "No"}</td>
+          <td>
+            <button id="paid-btn-${referral.id}" class="btn btn-sm btn-success"
+              onclick="markAsPaid(${referral.id})" ${referral.paid ? 'disabled' : ''}>
+              ${referral.paid ? 'Pagado' : 'Pagar'}
+            </button>
+          </td>`;
+        tableBody.appendChild(row);
+      });
+    } else {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td colspan="8" class="text-center">No se encontraron registros.</td>`;
+      tableBody.appendChild(row);
+
+    }
+  }
+
+  async function markAsPaid(referralId) {
+    try {
+      const response = await fetch(`/referrals/update/${referralId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ paid: true }) // Mandamos el estado de pagado
+      });
+
+      const result = await response.json();
+      console.log("🚀 ~ markAsPaid ~ result:", result)
+
+      if (result.status === "success") {
+        document.getElementById(`paid-btn-${referralId}`).textContent = 'Pagado';
+        document.getElementById(`paid-btn-${referralId}`).disabled = true;
+      }
+    } catch (error) {
+      console.error('Error al actualizar el estado de pago:', error);
+    }
+  }
+</script>
+
+<script>
+  document.getElementById("download-button").addEventListener("click", async () => {
+    // Parámetros dinámicos
+    const driverId = document.getElementById('driverDropdown').value;
+    const startDate = document.getElementById('start').value;
+    const endDate = document.getElementById('end').value;
+    const paid = document.getElementById('paid').value;
+
+    // Construir la URL con parámetros
+    const query = `?refererId=${driverId}&startDate=${startDate}&endDate=${endDate}&paid=${paid}`;
+    const downloadUrl = `/referrals/excel-report${query}`;
+
+    console.log(downloadUrl)
+
+    try {
+      const response = await fetch(downloadUrl);
+      if (!response.ok) throw new Error("Error al descargar el archivo.");
+
+      // Crear un enlace temporal para descargar el archivo
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Reporte.xlsx"; // Nombre del archivo
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(error);
+      alert("Ocurrió un error al descargar el archivo.");
+    }
+  });
+</script>
 
 </html>
