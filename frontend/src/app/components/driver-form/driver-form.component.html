@@ -1,0 +1,33 @@
+<div class="flex flex-col items-center py-5 bg-gray-100 min-h-screen">
+  <h1 class="text-center text-2xl font-bold mb-6">Registrar Conductor</h1>
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()"
+    class="bg-white shadow-lg rounded-lg p-6 w-full max-w-md space-y-4">
+    <div>
+      <label for="name" class="block mb-1 font-medium">Nombre:</label>
+      <input id="name" type="text" pInputText formControlName="name" class="w-full p-2 border rounded"
+        placeholder="Ingrese el nombre" />
+    </div>
+
+    <div>
+      <label for="license" class="block mb-1 font-medium">Licencia:</label>
+      <input id="license" type="text" pInputText formControlName="license" class="w-full p-2 border rounded"
+        placeholder="Número de licencia" />
+    </div>
+
+    <div>
+      <label for="cellphone" class="block mb-1 font-medium">Teléfono:</label>
+      <input id="cellphone" type="text" pInputText formControlName="cellphone" class="w-full p-2 border rounded"
+        placeholder="Número de teléfono" />
+    </div>
+
+    <div>
+      <label class="block mb-1 font-medium">Ciudad:</label>
+      <p-select [options]="cities" formControlName="city" placeholder="Selecciona una ciudad" class="w-full"></p-select>
+    </div>
+
+    <button pButton type="submit" label="Registrar" class="w-full">Registrar</button>
+  </form>
+
+  <p-toast></p-toast>
+</div>
