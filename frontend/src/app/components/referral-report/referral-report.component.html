@@ -1,0 +1,43 @@
+<h1>Reporte de referidos</h1>
+<div class="flex gap-5">
+  <p-floatlabel variant="in" class="w-full">
+    <p-select inputId="in_referral" [options]="drivers" optionLabel="name" styleClass="w-full" variant="filled"
+      class="w-full" />
+    <label for="in_referral">Referidor</label>
+  </p-floatlabel>
+
+
+  <p-floatlabel variant="in" class="w-full">
+    <p-select inputId="in_obj_complete" [options]="obj_complete" optionLabel="name" styleClass="w-full" variant="filled"
+      class="w-full" />
+    <label for="in_obj_complete">Objetivo</label>
+  </p-floatlabel>
+
+
+  <p-floatlabel variant="in" class="w-full">
+    <p-datepicker inputId="in_label" showIcon iconDisplay="input" selectionMode="range" />
+    <label for="in_label">Registro</label>
+  </p-floatlabel>
+</div>
+
+<p-table [value]="drivers" [tableStyle]="{ 'min-width': '50rem' }">
+  <ng-template #header>
+    <tr>
+      <th>Code</th>
+      <th>Name</th>
+      <th>Licence</th>
+      <th>Register</th>
+      <th>Obj</th>
+
+    </tr>
+  </ng-template>
+  <ng-template #body let-product>
+    <tr>
+      <td>{{ product.code }}</td>
+      <td>{{ product.name }}</td>
+      <td>{{ product.licence }}</td>
+      <td>{{ product.registerDate }}</td>
+      <td>{{ product.obj_complete }}</td>
+    </tr>
+  </ng-template>
+</p-table>

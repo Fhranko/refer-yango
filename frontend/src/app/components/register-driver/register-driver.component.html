@@ -1,0 +1,25 @@
+<form [formGroup]="form" class="border-2 w-150 p-5 rounded">
+  <p-floatlabel variant="in" class="my-3 w-full">
+    <input pInputText id="in_name" autocomplete="off" formControlName="name" class="w-full" />
+    <label for="in_name">Nombre</label>
+  </p-floatlabel>
+
+  <p-floatlabel variant="in" class="my-3 w-full">
+    <input pInputText id="in_licence" autocomplete="off" formControlName="licence" class="w-full" />
+    <label for="in_licence">Licencia</label>
+  </p-floatlabel>
+
+  <p-floatlabel variant="in" class="my-3 w-full">
+    <input pInputText id="in_phone" autocomplete="off" formControlName="phone" class="w-full" />
+    <label for="in_phone">Teléfono</label>
+  </p-floatlabel>
+
+  <p-floatlabel variant="in" class="my-3 w-full">
+    <p-select inputId="in_city" [options]="cities" optionLabel="name" styleClass="w-full" variant="filled"
+      formControlName="city" class="w-full" />
+    <label for="in_city">Ciudad</label>
+  </p-floatlabel>
+
+  <p-button label="Registrar" class="w-full" fluid />
+
+</form>

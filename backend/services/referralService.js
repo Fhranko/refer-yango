@@ -7,122 +7,95 @@ const registerReferral = async (referralsData) => {
 
 	// Validación de entrada
 	if (!referer_id || !referred_id) {
-		return {
-			status: 'error',
-			message: 'Los IDs de referidor y referido son obligatorios.',
-		};
+		return { status: 'error', message: 'Los IDs de referidor y referido son obligatorios.' };
 	}
 
 	if (referer_id === referred_id) {
-		return {
-			status: 'error',
-			message: 'Un conductor no puede referirse a sí mismo.',
-		};
+		return { status: 'error', message: 'Un conductor no puede referirse a sí mismo.' };
 	}
 
 	try {
-		// Validar si la relación referer_id -> referred_id ya existe
+		// Verificar si la relación referer_id -> referred_id ya existe o si el referido ya tiene otro referidor de nivel 1
 		const { data: existingReferral, error: existingError } = await supabase
 			.from('referrals')
 			.select('referer_id')
 			.eq('referred_id', referred_id)
-			.eq('referer_id', referer_id)
 			.limit(1)
 			.single();
 
-		if (existingError && existingError.code !== 'PGRST116') {
-			throw existingError;
-		}
+		if (existingError && existingError.code !== 'PGRST116') throw existingError;
 
 		if (existingReferral) {
-			return {
-				status: 'error',
-				message: 'El referido y el referidor ya están asociados previamente.',
-			};
-		}
-
-		// Validar si el referido ya tiene otro referidor de nivel 1
-		const { data: previousReferral, error: previousError } = await supabase
-			.from('referrals')
-			.select('referer_id')
-			.eq('referred_id', referred_id)
-			.eq('level', 1)
-			.limit(1)
-			.single();
-
-		if (previousError && previousError.code !== 'PGRST116') {
-			throw previousError;
-		}
-
-		if (previousReferral) {
 			return {
 				status: 'error',
 				message: 'El referido ya fue registrado anteriormente.',
 			};
 		}
 
-		// Insertar el referido de nivel 1
+		// Insertar el referido de nivel 1 y devolver la fila insertada
 		const { data: newReferral, error: insertError } = await supabase
 			.from('referrals')
-			.insert([{ referer_id: referer_id, referred_id: referred_id, level: 1, amount: 20 }])
-			.select(); // Devuelve la fila insertada
+			.insert({ referer_id, referred_id })
+			.select()
+			.single();
 
-		if (insertError) {
-			throw insertError;
-		}
+		if (insertError) throw insertError;
 
-		// Buscar el referidor del referidor (nivel 2)
+		// Insertar los pagos del referidor y referido
+		const paymentData = [
+			{
+				driver_id: referer_id,
+				level: 1,
+				amount: 20,
+				status: 'pending',
+				referrals_id: newReferral.id,
+			},
+			{
+				driver_id: referred_id,
+				level: 1,
+				amount: 20,
+				status: 'pending',
+				referrals_id: newReferral.id,
+			},
+		];
+
+		// Verificar si el referidor tiene un referidor de nivel 1 para pagarle también
 		const { data: parentReferral, error: parentError } = await supabase
 			.from('referrals')
 			.select('referer_id')
 			.eq('referred_id', referer_id)
-			.eq('level', 1)
 			.limit(1)
 			.single();
 
-		if (parentError && parentError.code !== 'PGRST116') {
-			throw parentError;
+		if (parentError && parentError.code !== 'PGRST116') throw parentError;
+
+		if (parentReferral) {
+			paymentData.push({
+				driver_id: parentReferral.referer_id,
+				level: 1,
+				amount: 10,
+				status: 'pending',
+				referrals_id: newReferral.id,
+			});
 		}
 
-		if (!parentReferral) {
-			return {
-				status: 'success',
-				message: 'Referido registrado con éxito en nivel 1.',
-				referral: newReferral,
-			};
-		}
+		// Insertar todos los pagos en paralelo
+		const { error: paymentError } = await supabase.from('payments').insert(paymentData);
 
-		// Insertar el referido de nivel 2
-		const { data: level2Referral, error: level2Error } = await supabase
-			.from('referrals')
-			.insert([
-				{ referer_id: parentReferral.referer_id, referred_id: referred_id, level: 2, amount: 10 },
-			])
-			.select();
+		if (paymentError) throw paymentError;
 
-		if (level2Error) {
-			throw level2Error;
-		}
-
-		return {
-			status: 'success',
-			message: 'Referido registrado con éxito en nivel 1 y 2.',
-			referrals: {
-				level1: newReferral,
-				level2: level2Referral,
-			},
-		};
+		return { status: 'success', message: 'Registrado' };
 	} catch (error) {
 		console.error('Error en la referencia:', error);
 
 		return {
 			status: 'error',
-			message: 'Error al registrar el referido.',
+			message:
+				error.code === '23503' ? 'ID de drivers no registrado' : 'Error al registrar el referido.',
 			details: error.message || 'Error desconocido.',
 		};
 	}
 };
-
 const getReport = async (filters) => {
 	const { refererId, startDate, endDate, paid } = filters;
 
