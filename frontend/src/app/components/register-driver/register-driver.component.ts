@@ -43,10 +43,7 @@ export class RegisterDriverComponent implements OnInit {
       Validators.required,
       Validators.minLength(3),
     ]),
-    cellphone: new FormControl('', [
-      Validators.required,
-      Validators.minLength(3),
-    ]),
+    cellphone: new FormControl('', []),
     city: new FormControl('', [Validators.required]),
   });
 

@@ -1,101 +1,43 @@
 // services/driverService.js
 const { supabase } = require('../config');
 const XLSX = require('xlsx');
+const { formatSupabaseError } = require('../utils/errorHandler'); // Importar función reutilizable
 
 const registerReferral = async (referralsData) => {
-	const { referer_id, referred_id } = referralsData;
+	const { referrer_id, referred_id } = referralsData;
 
-	// Validación de entrada
-	if (!referer_id || !referred_id) {
-		return { status: 'error', message: 'Los IDs de referidor y referido son obligatorios.' };
+	// Validaciones de entrada
+	if (!referrer_id || !referred_id) {
+		throw new Error('Los IDs de referidor y referido son obligatorios.');
 	}
 
-	if (referer_id === referred_id) {
-		return { status: 'error', message: 'Un conductor no puede referirse a sí mismo.' };
+	if (referrer_id === referred_id) {
+		throw new Error('Un conductor no puede referirse a sí mismo.');
 	}
 
-	try {
-		// Verificar si la relación referer_id -> referred_id ya existe o si el referido ya tiene otro referidor de nivel 1
-		const { data: existingReferral, error: existingError } = await supabase
-			.from('referrals')
-			.select('referer_id')
-			.eq('referred_id', referred_id)
-			.limit(1)
-			.single();
+	// Verificar si el referido ya tiene un referidor
+	const { data: existingReferral, error: existingError } = await supabase
+		.from('referrals')
+		.select('referrer_id')
+		.eq('referred_id', referred_id)
+		.limit(1)
+		.maybeSingle();
 
-		if (existingError && existingError.code !== 'PGRST116') throw existingError;
+	if (existingError) throw formatSupabaseError(existingError);
+	if (existingReferral) throw new Error('El conductor ya tiene un referidor asignado.');
 
-		if (existingReferral) {
-			return {
-				status: 'error',
-				message: 'El referido ya fue registrado anteriormente.',
-			};
-		}
+	// Insertar el referido
+	const { data, error: insertError } = await supabase
+		.from('referrals')
+		.insert({ referrer_id, referred_id })
+		.select()
+		.single();
 
-		// Insertar el referido de nivel 1 y devolver la fila insertada
-		const { data: newReferral, error: insertError } = await supabase
-			.from('referrals')
-			.insert({ referer_id, referred_id })
-			.select()
-			.single();
+	if (insertError) throw formatSupabaseError(insertError);
 
-		if (insertError) throw insertError;
-
-		// Insertar los pagos del referidor y referido
-		const paymentData = [
-			{
-				driver_id: referer_id,
-				level: 1,
-				amount: 20,
-				status: 'pending',
-				referrals_id: newReferral.id,
-			},
-			{
-				driver_id: referred_id,
-				level: 1,
-				amount: 20,
-				status: 'pending',
-				referrals_id: newReferral.id,
-			},
-		];
-
-		// Verificar si el referidor tiene un referidor de nivel 1 para pagarle también
-		const { data: parentReferral, error: parentError } = await supabase
-			.from('referrals')
-			.select('referer_id')
-			.eq('referred_id', referer_id)
-			.limit(1)
-			.single();
-
-		if (parentError && parentError.code !== 'PGRST116') throw parentError;
-
-		if (parentReferral) {
-			paymentData.push({
-				driver_id: parentReferral.referer_id,
-				level: 1,
-				amount: 10,
-				status: 'pending',
-				referrals_id: newReferral.id,
-			});
-		}
-
-		// Insertar todos los pagos en paralelo
-		const { error: paymentError } = await supabase.from('payments').insert(paymentData);
-
-		if (paymentError) throw paymentError;
-
-		return { status: 'success', message: 'Registrado' };
-	} catch (error) {
-		console.error('Error en la referencia:', error);
-
-		return {
-			status: 'error',
-			message:
-				error.code === '23503' ? 'ID de drivers no registrado' : 'Error al registrar el referido.',
-			details: error.message || 'Error desconocido.',
-		};
-	}
+	return { status: 'success', message: 'Registrado', referral: data };
 };
+
 const getReferrals = async (filters) => {
 	const { refererId, startDate, endDate, paid } = filters;
 
@@ -108,12 +50,12 @@ const getReferrals = async (filters) => {
 		let query = supabase.from('referrals').select(
 			`
       *,
-      referer:drivers!referrals_referer_id_fkey(*),
+      referer:drivers!referrals_referrer_id_fkey(*),
       referred:drivers!referrals_referred_id_fkey(*)
     `
 		);
 		if (refererId) {
-			query = query.eq('referer_id', refererId);
+			query = query.eq('referrer_id', refererId);
 		}
 
 		// Agregar condición de fecha si se proporcionan
@@ -129,6 +71,8 @@ const getReferrals = async (filters) => {
 
 		// Ejecutar la consulta
 		let { data, error } = await query;
+
+		console.log(data);
 
 		data = data.map((item) => ({
 			...item,

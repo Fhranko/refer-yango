@@ -14,7 +14,12 @@ router.post('/register', async (req, res) => {
 	console.log(req.body);
 
 	try {
-		await registerDriver({ name, license, cellphone, city: city.code });
+		await registerDriver({
+			name,
+			license,
+			cellphone: cellphone ? cellphone : null,
+			city: city.code,
+		});
 		res.send({ status: 'success', message: 'Conductor registrado con éxito.' });
 	} catch (error) {
 		res.status(400).send({ status: 'error', message: 'Error: ' + error.message });

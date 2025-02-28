@@ -1,10 +1,12 @@
+<p-toast />
+
 <p-card>
   <h1 class="text-3xl">Registrar referido</h1>
-  <div class="flex flex-row gap-5 w-full">
+  <div [formGroup]="referralForm" class="flex flex-row gap-5 w-full">
     <p-floatlabel variant="in" class="my-3 w-full">
-      <p-select inputId="in_city" [options]="drivers" optionLabel="name" styleClass="w-full" variant="filled"
-        class="w-full" />
-      <label for="in_city">Referidor</label>
+      <p-select inputId="in_referrer" formControlName="referrer_id" [options]="drivers" optionLabel="name"
+        styleClass="w-full" variant="filled" class="w-full" />
+      <label for="in_referrer">Referidor</label>
     </p-floatlabel>
 
     <div class="flex justify-center items-center flex-col">
@@ -12,11 +14,11 @@
     </div>
 
     <p-floatlabel variant="in" class="my-3 w-full">
-      <p-select inputId="in_city" [options]="drivers" optionLabel="name" styleClass="w-full" variant="filled"
-        class="w-full" />
-      <label for="in_city">Referido</label>
+      <p-select inputId="in_referred" formControlName="referred_id" [options]="drivers" optionLabel="name"
+        styleClass="w-full" variant="filled" class="w-full" />
+      <label for="in_referred">Referido</label>
     </p-floatlabel>
 
   </div>
-  <p-button class="w-full" fluid>Referir</p-button>
+  <p-button (onClick)="registerReferral()" class="w-full" fluid>Referir</p-button>
 </p-card>

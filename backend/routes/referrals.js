@@ -11,10 +11,10 @@ const {
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-	const { refererId, startDate, endDate, paid } = req.query;
+	const { referrerId, startDate, endDate, paid } = req.query;
 
 	try {
-		const data = await getReferrals({ refererId, startDate, endDate, paid });
+		const data = await getReferrals({ referrerId, startDate, endDate, paid });
 
 		res.send(data);
 	} catch (error) {
@@ -24,30 +24,30 @@ router.get('/', async (req, res) => {
 	}
 });
 
-router.get('/register', async (req, res) => {
+// router.get('/register', async (req, res) => {
+// 	try {
+// 		const drivers = await getDrivers();
+
+// 		res.render('refer', { drivers });
+// 	} catch (error) {
+// 		res
+// 			.status(500)
+// 			.send({ status: 'error', message: 'Error al obtener los conductores: ' + error.message });
+// 	}
+// });
+
+router.post('/', async (req, res) => {
+	const { referrer_id, referred_id } = req.body;
+
 	try {
-		const drivers = await getDrivers();
-
-		res.render('refer', { drivers });
-	} catch (error) {
-		res
-			.status(500)
-			.send({ status: 'error', message: 'Error al obtener los conductores: ' + error.message });
-	}
-});
-
-router.post('/register', async (req, res) => {
-	const { referer_id, referred_id } = req.body;
-
-	try {
-		const data = await registerReferral({ referer_id, referred_id });
+		const data = await registerReferral({ referrer_id, referred_id });
 
 		res.send(data);
 	} catch (error) {
 		console.log('🚀 ~ router.post ~ error:', error);
 		res
 			.status(400)
-			.send({ status: 'error', message: 'Error al registrar el conductor: ' + error.message });
+			.send({ status: 'error', message: 'Error al registrar el referido: ' + error.message });
 	}
 });
 
