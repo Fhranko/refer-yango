@@ -1,25 +1,31 @@
-<form [formGroup]="form" class="border-2 w-150 p-5 rounded">
-  <p-floatlabel variant="in" class="my-3 w-full">
-    <input pInputText id="in_name" autocomplete="off" formControlName="name" class="w-full" />
-    <label for="in_name">Nombre</label>
-  </p-floatlabel>
+<p-toast />
 
-  <p-floatlabel variant="in" class="my-3 w-full">
-    <input pInputText id="in_licence" autocomplete="off" formControlName="licence" class="w-full" />
-    <label for="in_licence">Licencia</label>
-  </p-floatlabel>
+<p-card>
+  <h1 class="text-3xl text-center">Registro de drivers</h1>
 
-  <p-floatlabel variant="in" class="my-3 w-full">
-    <input pInputText id="in_phone" autocomplete="off" formControlName="phone" class="w-full" />
-    <label for="in_phone">Teléfono</label>
-  </p-floatlabel>
+  <form [formGroup]="form" class="w-150 p-5 ">
+    <p-floatlabel variant="in" class="my-3 w-full">
+      <input pInputText id="in_name" autocomplete="off" formControlName="name" class="w-full" />
+      <label for="in_name">Nombre</label>
+    </p-floatlabel>
 
-  <p-floatlabel variant="in" class="my-3 w-full">
-    <p-select inputId="in_city" [options]="cities" optionLabel="name" styleClass="w-full" variant="filled"
-      formControlName="city" class="w-full" />
-    <label for="in_city">Ciudad</label>
-  </p-floatlabel>
+    <p-floatlabel variant="in" class="my-3 w-full">
+      <input pInputText id="in_license" autocomplete="off" formControlName="license" class="w-full" />
+      <label for="in_license">Licencia</label>
+    </p-floatlabel>
 
-  <p-button label="Registrar" class="w-full" fluid />
+    <p-floatlabel variant="in" class="my-3 w-full">
+      <input pInputText id="in_cellphone" autocomplete="off" formControlName="cellphone" class="w-full" />
+      <label for="in_cellphone">Teléfono</label>
+    </p-floatlabel>
 
-</form>
+    <p-floatlabel variant="in" class="my-3 w-full">
+      <p-select inputId="in_city" [options]="cities" optionLabel="name" styleClass="w-full" variant="filled"
+        formControlName="city" class="w-full" />
+      <label for="in_city">Ciudad</label>
+    </p-floatlabel>
+
+    <p-button (onClick)="onSubmit()" label="Registrar" class="w-full" fluid />
+
+  </form>
+</p-card>

@@ -1,4 +1,7 @@
-<h1>Reporte de referidos</h1>
+<app-register-referral></app-register-referral>
+
+<h1 class="text-3xl">Reporte de referido</h1>
+
 <div class="flex gap-5">
   <p-floatlabel variant="in" class="w-full">
     <p-select inputId="in_referral" [options]="drivers" optionLabel="name" styleClass="w-full" variant="filled"
@@ -23,20 +26,22 @@
 <p-table [value]="drivers" [tableStyle]="{ 'min-width': '50rem' }">
   <ng-template #header>
     <tr>
-      <th>Code</th>
-      <th>Name</th>
-      <th>Licence</th>
-      <th>Register</th>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Licencia</th>
+      <th>Teléfono</th>
+      <th>Ciudad</th>
       <th>Obj</th>
 
     </tr>
   </ng-template>
   <ng-template #body let-product>
     <tr>
-      <td>{{ product.code }}</td>
+      <td>{{ product.id }}</td>
       <td>{{ product.name }}</td>
-      <td>{{ product.licence }}</td>
-      <td>{{ product.registerDate }}</td>
+      <td>{{ product.license }}</td>
+      <td>{{ product.cellphone }}</td>
+      <td>{{ product.city }}</td>
       <td>{{ product.obj_complete }}</td>
     </tr>
   </ng-template>

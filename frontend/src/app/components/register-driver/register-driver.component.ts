@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DriverService } from '../../core/services/driver.service';
 
 import {
   FormControl,
@@ -11,6 +12,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabel } from 'primeng/floatlabel';
 import { Select } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
+import { Toast } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-register-driver',
@@ -20,18 +24,29 @@ import { ButtonModule } from 'primeng/button';
     FloatLabel,
     Select,
     ButtonModule,
+    Toast,
+    CardModule,
   ],
   templateUrl: './register-driver.component.html',
   styleUrl: './register-driver.component.css',
+  providers: [MessageService],
 })
 export class RegisterDriverComponent implements OnInit {
+  constructor(
+    private driverService: DriverService,
+    private messageService: MessageService
+  ) {}
+
   form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.minLength(3)]),
-    licence: new FormControl('', [
+    license: new FormControl('', [
       Validators.required,
       Validators.minLength(3),
     ]),
-    phone: new FormControl('', [Validators.required, Validators.minLength(3)]),
+    cellphone: new FormControl('', [
+      Validators.required,
+      Validators.minLength(3),
+    ]),
     city: new FormControl('', [Validators.required]),
   });
 
@@ -45,6 +60,36 @@ export class RegisterDriverComponent implements OnInit {
   }
 
   onSubmit(): void {
-    // console.warn(this.registerForm.value);
+    if (this.form.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error al procesar la solicitud',
+        detail: 'Por favor, complete todos los campos.',
+        life: 3000,
+      });
+      return;
+    }
+
+    this.driverService.registerDriver(this.form.value).subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Registro exitoso',
+          detail: response.message,
+          life: 3000,
+        });
+
+        this.form.reset();
+      },
+      error: (error) => {
+        console.log(error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error al procesar la solicitud',
+          detail: error.message,
+          life: 3000,
+        });
+      },
+    });
   }
 }

@@ -96,7 +96,7 @@ const registerReferral = async (referralsData) => {
 		};
 	}
 };
-const getReport = async (filters) => {
+const getReferrals = async (filters) => {
 	const { refererId, startDate, endDate, paid } = filters;
 
 	// Parsear las fechas
@@ -213,7 +213,7 @@ module.exports = { updateReferral };
 
 module.exports = {
 	registerReferral,
-	getReport,
+	getReferrals,
 	generateExcel,
 	updateReferral,
 };

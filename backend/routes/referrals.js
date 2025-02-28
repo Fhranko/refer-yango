@@ -3,12 +3,26 @@ const express = require('express');
 const { getDrivers } = require('../services/driverService');
 const {
 	registerReferral,
-	getReport,
+	getReferrals,
 	generateExcel,
 	updateReferral,
 } = require('../services/referralService');
 
 const router = express.Router();
+
+router.get('/', async (req, res) => {
+	const { refererId, startDate, endDate, paid } = req.query;
+
+	try {
+		const data = await getReferrals({ refererId, startDate, endDate, paid });
+
+		res.send(data);
+	} catch (error) {
+		res
+			.status(500)
+			.send({ status: 'error', message: 'Error al obtener los referidos: ' + error.message });
+	}
+});
 
 router.get('/register', async (req, res) => {
 	try {
@@ -34,20 +48,6 @@ router.post('/register', async (req, res) => {
 		res
 			.status(400)
 			.send({ status: 'error', message: 'Error al registrar el conductor: ' + error.message });
-	}
-});
-
-router.get('/report', async (req, res) => {
-	const { refererId, startDate, endDate, paid } = req.query;
-
-	try {
-		const data = await getReport({ refererId, startDate, endDate, paid });
-
-		res.send(data);
-	} catch (error) {
-		res
-			.status(500)
-			.send({ status: 'error', message: 'Error al obtener los referidos: ' + error.message });
 	}
 });
 

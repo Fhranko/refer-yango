@@ -5,8 +5,11 @@ const bodyParser = require('body-parser');
 const driversRouter = require('./routes/drivers');
 const referralsRouter = require('./routes/referrals');
 const { PORT } = require('./config');
+const cors = require('cors');
 
 const app = express();
+
+app.use(cors());
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }));
