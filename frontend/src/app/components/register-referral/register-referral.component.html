@@ -4,8 +4,8 @@
   <h1 class="text-3xl">Registrar referido</h1>
   <div [formGroup]="referralForm" class="flex flex-row gap-5 w-full">
     <p-floatlabel variant="in" class="my-3 w-full">
-      <p-select inputId="in_referrer" formControlName="referrer_id" [options]="drivers" optionLabel="name"
-        styleClass="w-full" variant="filled" class="w-full" />
+      <p-select inputId="in_referrer" formControlName="referrerId" [options]="drivers" optionLabel="name"
+        styleClass="w-full" variant="filled" class="w-full" [optionValue]="'id'" />
       <label for="in_referrer">Referidor</label>
     </p-floatlabel>
 
@@ -14,8 +14,8 @@
     </div>
 
     <p-floatlabel variant="in" class="my-3 w-full">
-      <p-select inputId="in_referred" formControlName="referred_id" [options]="drivers" optionLabel="name"
-        styleClass="w-full" variant="filled" class="w-full" />
+      <p-select inputId="in_referred" formControlName="referredId" [options]="drivers" optionLabel="name"
+        styleClass="w-full" variant="filled" class="w-full" [optionValue]="'id'" />
       <label for="in_referred">Referido</label>
     </p-floatlabel>
 

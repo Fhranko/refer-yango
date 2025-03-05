@@ -3,97 +3,82 @@ const { supabase } = require('../config');
 const XLSX = require('xlsx');
 const { formatSupabaseError } = require('../utils/errorHandler'); // Importar función reutilizable
 
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
 const registerReferral = async (referralsData) => {
-	const { referrer_id, referred_id } = referralsData;
+	console.log('🚀 ~ registerReferral ~ referralsData:', referralsData);
+	try {
+		const { referrerId, referredId } = referralsData;
 
-	// Validaciones de entrada
-	if (!referrer_id || !referred_id) {
-		throw new Error('Los IDs de referidor y referido son obligatorios.');
+		// Validaciones de entrada
+		if (!referrerId || !referredId) {
+			throw new Error('Los IDs de referidor y referido son obligatorios.');
+		}
+
+		if (referrerId === referredId) {
+			throw new Error('Un conductor no puede referirse a sí mismo.');
+		}
+
+		// Verificar si el referido ya tiene un referidor
+		const existingReferral = await prisma.referral.findFirst({
+			where: { referredId: referredId.id },
+		});
+
+		if (existingReferral) {
+			throw new Error('El conductor ya tiene un referidor asignado.');
+		}
+
+		// Insertar el referido
+		const newReferral = await prisma.referral.create({
+			data: referralsData,
+		});
+
+		return { status: 'success', message: 'Registrado', referral: newReferral };
+	} catch (error) {
+		throw error;
 	}
-
-	if (referrer_id === referred_id) {
-		throw new Error('Un conductor no puede referirse a sí mismo.');
-	}
-
-	// Verificar si el referido ya tiene un referidor
-	const { data: existingReferral, error: existingError } = await supabase
-		.from('referrals')
-		.select('referrer_id')
-		.eq('referred_id', referred_id)
-		.limit(1)
-		.maybeSingle();
-
-	if (existingError) throw formatSupabaseError(existingError);
-	if (existingReferral) throw new Error('El conductor ya tiene un referidor asignado.');
-
-	// Insertar el referido
-	const { data, error: insertError } = await supabase
-		.from('referrals')
-		.insert({ referrer_id, referred_id })
-		.select()
-		.single();
-
-	if (insertError) throw formatSupabaseError(insertError);
-
-	return { status: 'success', message: 'Registrado', referral: data };
 };
 
 const getReferrals = async (filters) => {
 	const { refererId, startDate, endDate, paid } = filters;
 
-	// Parsear las fechas
-	const start = startDate ? new Date(startDate) : null;
-	const end = endDate ? new Date(endDate) : null;
-
 	try {
-		// Inicializamos la consulta
-		let query = supabase.from('referrals').select(
-			`
-      *,
-      referer:drivers!referrals_referrer_id_fkey(*),
-      referred:drivers!referrals_referred_id_fkey(*)
-    `
-		);
-		if (refererId) {
-			query = query.eq('referrer_id', refererId);
+		// Construcción del filtro dinámico
+		const where = {};
+
+		if (refererId) where.referrer_id = refererId;
+		if (paid !== undefined) where.paid = paid;
+		if (startDate || endDate) {
+			where.referral_date = {};
+			if (startDate) where.referral_date.gte = new Date(startDate);
+			if (endDate) where.referral_date.lte = new Date(endDate);
 		}
 
-		// Agregar condición de fecha si se proporcionan
-		if (start) {
-			query = query.gte('referral_date', start.toISOString()); // Filtrar por fecha de inicio (mayor o igual)
-		}
-		if (end) {
-			query = query.lte('referral_date', end.toISOString()); // Filtrar por fecha de fin (menor o igual)
-		}
-		if (paid) {
-			query = query.eq('paid', paid); // Filtrar por fecha de fin (menor o igual)
-		}
+		// Consulta a Prisma
+		const data = await prisma.referral.findMany({
+			where,
+			include: {
+				referer: true, // Relación con el referidor
+				referred: true, // Relación con el referido
+			},
+			orderBy: { referral_date: 'desc' }, // Ordenar por fecha descendente
+		});
 
-		// Ejecutar la consulta
-		let { data, error } = await query;
-
-		console.log(data);
-
-		data = data.map((item) => ({
+		// Formatear fechas en el servidor para evitar carga en el frontend
+		const formattedData = data.map((item) => ({
 			...item,
-			created_at: new Date(item.created_at).toLocaleDateString('es-ES', {
+			created_at: item.created_at.toLocaleDateString('es-ES', {
 				day: '2-digit',
 				month: '2-digit',
 				year: '2-digit',
 			}),
 		}));
 
-		// Manejo de error
-		if (error) {
-			console.log(error);
-			throw error;
-		}
-
-		// Devolver los datos
-		return data;
+		return formattedData;
 	} catch (error) {
-		console.log('🚀 ~ getReport ~ error:', error);
-		res.status(400).json({ message: 'Error al obtener los referidos: ' + error.message });
+		console.error('Error al obtener referidos:', error);
+		throw new Error('Error al obtener los referidos, inténtelo más tarde.');
 	}
 };
 

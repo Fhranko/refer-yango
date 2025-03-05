@@ -1,36 +1,30 @@
-// services/driverService.js
-const { supabase } = require('../config');
-const { formatSupabaseError } = require('../utils/errorHandler'); // Importar función reutilizable
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-const registerDriver = async (driverData) => {
-	const { data: driverFinded, error: driverError } = await supabase
-		.from('drivers')
-		.select('*')
-		.eq('license', driverData.license)
-		.limit(1)
-		.single();
+const registerDriver = async (data) => {
+	try {
+		const existingDriver = await prisma.driver.findUnique({
+			where: { license: data.license },
+		});
 
-	if (driverFinded) {
-		throw new Error('El conductor ya está registrado.');
+		if (existingDriver) {
+			const error = new Error('La licencia ya está registrada.');
+			error.status = 400;
+			throw error;
+		}
+
+		return await prisma.driver.create({ data });
+	} catch (error) {
+		throw error; // Pasamos el error para que lo maneje el middleware global
 	}
-
-	const { data, error } = await supabase.from('drivers').insert([driverData]);
-
-	if (error) {
-		console.log('🚀 ~ registerDriver ~ error:', error);
-		throw formatSupabaseError(error); // Usamos la función centralizada
-	}
-
-	return data;
 };
 
 const getDrivers = async () => {
-	const { data, error } = await supabase.from('drivers').select('*');
-
-	if (error) {
+	try {
+		return await prisma.driver.findMany();
+	} catch (error) {
 		throw error;
 	}
-	return data;
 };
 
 module.exports = {

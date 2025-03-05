@@ -36,18 +36,15 @@ router.get('/', async (req, res) => {
 // 	}
 // });
 
-router.post('/', async (req, res) => {
-	const { referrer_id, referred_id } = req.body;
+router.post('/', async (req, res, next) => {
+	const { referrerId, referredId } = req.body;
 
 	try {
-		const data = await registerReferral({ referrer_id, referred_id });
+		const data = await registerReferral({ referrerId, referredId });
 
 		res.send(data);
 	} catch (error) {
-		console.log('🚀 ~ router.post ~ error:', error);
-		res
-			.status(400)
-			.send({ status: 'error', message: 'Error al registrar el referido: ' + error.message });
+		next(error); // Pasamos el error al middleware global
 	}
 });
 

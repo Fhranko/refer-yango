@@ -53,13 +53,11 @@ export class RegisterReferralComponent implements OnInit {
   }
 
   referralForm = new FormGroup({
-    referrer_id: new FormControl('', [Validators.required]),
-    referred_id: new FormControl('', [Validators.required]),
+    referrerId: new FormControl('', [Validators.required]),
+    referredId: new FormControl('', [Validators.required]),
   });
 
   registerReferral(): void {
-    console.log('Registering referral...');
-
     if (this.referralForm.invalid) {
       this.messageService.add({
         severity: 'error',
@@ -70,9 +68,15 @@ export class RegisterReferralComponent implements OnInit {
       return;
     }
 
+    // const referralData = {
+    //   referrerId: this.referralForm.value.referrerId?.id,
+    //   referredId: this.referralForm.value.referredId?.id,
+    // };
+
+    console.log(this.referralForm.value);
+
     this.referralService.registerReferral(this.referralForm.value).subscribe({
       next: (response) => {
-        console.log(response, 'OK');
         this.messageService.add({
           severity: 'success',
           summary: 'Referido registrado',
