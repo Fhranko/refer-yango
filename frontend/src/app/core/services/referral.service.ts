@@ -19,6 +19,12 @@ export class ReferralService {
       .pipe(catchError(this.handleError));
   }
 
+  getReferrals(filters: any): Observable<any> {
+    return this.http
+      .get(`${this.apiUrl}/referrals`, { params: filters })
+      .pipe(catchError(this.handleError));
+  }
+
   private handleError(error: HttpErrorResponse) {
     console.error(`Error en la API: ${error.status} - ${error.message}`);
 

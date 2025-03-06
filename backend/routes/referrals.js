@@ -11,10 +11,8 @@ const {
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-	const { referrerId, startDate, endDate, paid } = req.query;
-
 	try {
-		const data = await getReferrals({ referrerId, startDate, endDate, paid });
+		const data = await getReferrals(req.query);
 
 		res.send(data);
 	} catch (error) {

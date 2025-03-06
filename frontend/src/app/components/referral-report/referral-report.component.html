@@ -2,47 +2,69 @@
 
 <h1 class="text-3xl">Reporte de referido</h1>
 
-<div class="flex gap-5">
+<form [formGroup]="filterForm" class="flex gap-5">
   <p-floatlabel variant="in" class="w-full">
-    <p-select inputId="in_referral" [options]="drivers" optionLabel="name" styleClass="w-full" variant="filled"
-      class="w-full" />
-    <label for="in_referral">Referidor</label>
+    <p-select formControlName="referrerId" inputId="in_referrer" [options]="drivers" optionLabel="label"
+      styleClass="w-full" variant="filled" [filter]="true" filterBy="label" [showClear]="true" [optionValue]="'id'" />
+    <label for="in_referrer">Referidor</label>
+  </p-floatlabel>
+
+  <p-floatlabel variant="in" class="w-full">
+    <p-select formControlName="referredId" inputId="in_referred" [options]="drivers" optionLabel="label"
+      styleClass="w-full" variant="filled" [filter]="true" filterBy="label" [showClear]="true" [optionValue]="'id'" />
+    <label for="in_referred">Referido</label>
+  </p-floatlabel>
+
+  <p-floatlabel variant="in" class="w-full">
+    <p-select formControlName="objStatus" inputId="in_objStatus" [options]="obj_complete" optionLabel="name"
+      styleClass="w-full" variant="filled" checkmark="true" [optionValue]="'code'" [showClear]="true" />
+    <label for="in_objStatus">Objetivo</label>
+  </p-floatlabel>
+
+  <p-floatlabel variant="in" class="w-full">
+    <p-datepicker formControlName="referralDateRange" inputId="in_label" showIcon iconDisplay="input"
+      selectionMode="range" />
+    <label for="in_label">Fecha referido</label>
   </p-floatlabel>
 
 
-  <p-floatlabel variant="in" class="w-full">
-    <p-select inputId="in_obj_complete" [options]="obj_complete" optionLabel="name" styleClass="w-full" variant="filled"
-      class="w-full" />
-    <label for="in_obj_complete">Objetivo</label>
-  </p-floatlabel>
+</form>
 
+<p-button (onClick)="getReferrals()">Buscar</p-button>
 
-  <p-floatlabel variant="in" class="w-full">
-    <p-datepicker inputId="in_label" showIcon iconDisplay="input" selectionMode="range" />
-    <label for="in_label">Registro</label>
-  </p-floatlabel>
-</div>
-
-<p-table [value]="drivers" [tableStyle]="{ 'min-width': '50rem' }">
+<p-table #dt [value]="referralsData" [tableStyle]="{ 'min-width': '50rem' }" stripedRows>
+  <ng-template #caption>
+    <div class="text-end pb-4">
+      <p-button icon="pi pi-external-link" label="Export" (click)="dt.exportCSV()" />
+    </div>
+  </ng-template>
   <ng-template #header>
     <tr>
       <th>ID</th>
-      <th>Nombre</th>
-      <th>Licencia</th>
-      <th>Teléfono</th>
-      <th>Ciudad</th>
-      <th>Obj</th>
+      <th>Referidor</th>
+      <th>Referidor lic.</th>
+      <th>Referido</th>
+      <th>Referido lic.</th>
+      <th>Fecha referido</th>
+      <th>Objetivo</th>
+      <th>Obj. Fecha</th>
+      <th>Acciones</th>
 
     </tr>
   </ng-template>
-  <ng-template #body let-product>
+  <ng-template #body let-referralData>
     <tr>
-      <td>{{ product.id }}</td>
-      <td>{{ product.name }}</td>
-      <td>{{ product.license }}</td>
-      <td>{{ product.cellphone }}</td>
-      <td>{{ product.city }}</td>
-      <td>{{ product.obj_complete }}</td>
+      <td>{{ referralData.id }}</td>
+      <td>{{ referralData.referrer.name }}</td>
+      <td>{{ referralData.referrer.license }}</td>
+      <td>{{ referralData.referred.name }}</td>
+      <td>{{ referralData.referred.license }}</td>
+      <td>{{ referralData.referralDatelabel }}</td>
+      <td>{{ referralData.objStatus }}</td>
+      <td>{{ referralData.objCompleteDate }}</td>
+      <td style="text-align: center">
+        <p-button rounded icon="pi pi-cog" />
+      </td>
     </tr>
   </ng-template>
 </p-table>

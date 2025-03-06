@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Referral" ALTER COLUMN "referralDate" SET DATA TYPE TIMESTAMP(3),
+ALTER COLUMN "objCompleteDate" SET DATA TYPE TIMESTAMP(3);

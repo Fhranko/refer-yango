@@ -22,11 +22,13 @@ const registerReferral = async (referralsData) => {
 
 		// Verificar si el referido ya tiene un referidor
 		const existingReferral = await prisma.referral.findFirst({
-			where: { referredId: referredId.id },
+			where: { referredId: referredId },
 		});
 
+		console.log(existingReferral);
+
 		if (existingReferral) {
-			throw new Error('El conductor ya tiene un referidor asignado.');
+			throw new Error('El referido ya fue registrado anteriormente.');
 		}
 
 		// Insertar el referido
@@ -34,48 +36,50 @@ const registerReferral = async (referralsData) => {
 			data: referralsData,
 		});
 
-		return { status: 'success', message: 'Registrado', referral: newReferral };
+		return { status: 'success', message: 'Referido registrado', referral: newReferral };
 	} catch (error) {
 		throw error;
 	}
 };
 
 const getReferrals = async (filters) => {
-	const { refererId, startDate, endDate, paid } = filters;
+	console.log('🚀 ~ getReferrals ~ filters:', filters);
+	const { referrerId, referredId, objStatus, referralDateRange, paid } = filters;
 
 	try {
 		// Construcción del filtro dinámico
 		const where = {};
 
-		if (refererId) where.referrer_id = refererId;
-		if (paid !== undefined) where.paid = paid;
-		if (startDate || endDate) {
-			where.referral_date = {};
-			if (startDate) where.referral_date.gte = new Date(startDate);
-			if (endDate) where.referral_date.lte = new Date(endDate);
+		if (referrerId !== null && referrerId !== '' && referrerId !== 'null') {
+			where.referrerId = Number(referrerId);
+		}
+
+		if (referredId !== null && referredId !== '' && referredId !== 'null') {
+			where.referredId = Number(referredId);
+		}
+
+		if (objStatus !== null && objStatus !== '' && objStatus !== 'null') {
+			where.objStatus = objStatus;
+		}
+
+		// if (paid !== undefined) where.paid = paid;
+		if (referralDateRange !== null && referralDateRange !== '' && referralDateRange !== 'null') {
+			where.referralDate = {};
+			if (referralDateRange[0]) where.referralDate.gte = new Date(referralDateRange[0]);
+			if (referralDateRange[1]) where.referralDate.lte = new Date(referralDateRange[1]);
 		}
 
 		// Consulta a Prisma
 		const data = await prisma.referral.findMany({
 			where,
 			include: {
-				referer: true, // Relación con el referidor
+				referrer: true, // Relación con el referidor
 				referred: true, // Relación con el referido
 			},
-			orderBy: { referral_date: 'desc' }, // Ordenar por fecha descendente
+			orderBy: { referralDate: 'desc' }, // Ordenar por fecha descendente
 		});
 
-		// Formatear fechas en el servidor para evitar carga en el frontend
-		const formattedData = data.map((item) => ({
-			...item,
-			created_at: item.created_at.toLocaleDateString('es-ES', {
-				day: '2-digit',
-				month: '2-digit',
-				year: '2-digit',
-			}),
-		}));
-
-		return formattedData;
+		return data;
 	} catch (error) {
 		console.error('Error al obtener referidos:', error);
 		throw new Error('Error al obtener los referidos, inténtelo más tarde.');
